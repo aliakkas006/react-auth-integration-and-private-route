@@ -1,11 +1,12 @@
 
-import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile, FacebookAuthProvider } from "firebase/auth";
 import { useState } from "react";
 import initializeAuthentication from "./Firebase/firebase.init";
 
 initializeAuthentication();
 
 const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSignin, setIsSignin] = useState(false);
+  const [user, setUser] = useState({});
 
   const auth = getAuth();
 
@@ -21,11 +23,33 @@ function App() {
     signInWithPopup(auth, googleProvider)
       .then(result => {
         // The signed-in user info.
-        const user = result.user;
+        const { displayName, email, photoURL } = result.user;
+        const userInfo = {
+          name: displayName,
+          email: email,
+          photo: photoURL
+        }
+        setUser(userInfo);
     })
   }
 
-  // Checkbox handle:
+  // handle Facebook sign in:
+  const handleFacebookSignIn = () => {
+    signInWithPopup(auth, facebookProvider)
+      .then(result => {
+        // The signed-in user info.
+        const { displayName, email, photoURL } = result.user;
+        console.log(result.user);
+        const userInfo = {
+          name: displayName,
+          email: email,
+          photo: photoURL
+        }
+        setUser(userInfo);
+      })
+  }
+
+  // Checkbox handle
   const toggleSignin = (e) => {
     setIsSignin(e.target.checked);
   }
@@ -158,6 +182,12 @@ function App() {
         <br /><br />
         <button type="button" onClick={handleResetPassword} class="btn btn-warning btn-sm">Reset Password</button>
       </form>
+      <br /><br /><br /><br /><br />
+
+      {/* Facebook Sign in */}
+      <button onClick={handleGoogleSignin}>Google Sign in</button>
+      <br /><br />
+      <button onClick={handleFacebookSignIn}>Facebook Sign in</button>
 
     </div>
   );
